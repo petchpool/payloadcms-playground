@@ -41,12 +41,21 @@ export default buildConfig({
   onInit: async (payload) => {
     // Seed default navigation menu if it doesn't exist
     try {
-      const existingNav = await payload.findGlobal({
-        slug: 'navigation',
-      })
+      let existingNav: any = null
+      let shouldSeedNav = false
 
-      // ถ้ายังไม่มีข้อมูล หรือไม่มี menuItems ให้ seed ข้อมูลเริ่มต้น
-      if (!existingNav || !existingNav.menuItems || existingNav.menuItems.length === 0) {
+      try {
+        existingNav = await payload.findGlobal({
+          slug: 'navigation',
+        })
+        if (!existingNav.menuItems || existingNav.menuItems.length === 0) {
+          shouldSeedNav = true
+        }
+      } catch {
+        shouldSeedNav = true
+      }
+
+      if (shouldSeedNav) {
         await payload.updateGlobal({
           slug: 'navigation',
           data: {
@@ -101,6 +110,7 @@ export default buildConfig({
               },
             ],
           },
+          overrideAccess: true,
         })
 
         payload.logger.info('✅ Default navigation menu seeded successfully')
@@ -176,36 +186,77 @@ export default buildConfig({
 
     // Seed default site settings if it doesn't exist
     try {
-      const existingSiteSettings = await payload.findGlobal({
-        slug: 'site-settings',
-      })
+      let existingSiteSettings: any = null
+      let shouldSeed = false
 
-      if (!existingSiteSettings || !existingSiteSettings.siteName) {
-        await payload.updateGlobal({
+      try {
+        existingSiteSettings = await payload.findGlobal({
+          slug: 'site-settings',
+        })
+        payload.logger.info(
+          `ℹ️ Found existing site settings: ${JSON.stringify(existingSiteSettings)}`,
+        )
+        // ถ้ามีแล้วแต่ไม่มี siteName ให้ seed ใหม่
+        if (!existingSiteSettings?.siteName) {
+          shouldSeed = true
+          payload.logger.info('ℹ️ Site settings exists but missing siteName, will seed')
+        }
+      } catch (err: any) {
+        // Global doesn't exist yet, will create it
+        payload.logger.info(`ℹ️ Site settings not found: ${err.message}, will create`)
+        shouldSeed = true
+      }
+
+      if (shouldSeed) {
+        payload.logger.info('🌱 Seeding site settings...')
+        const result = await payload.updateGlobal({
           slug: 'site-settings',
           data: {
             siteName: 'Smart Lotto',
             siteDescription: 'ระบบหวยออนไลน์ที่ทันสมัยและปลอดภัย',
             footerText: 'Smart Lotto - ระบบหวยออนไลน์',
           },
+          overrideAccess: true,
         })
-
-        payload.logger.info('✅ Default site settings seeded successfully')
+        payload.logger.info(
+          `✅ Default site settings seeded successfully: ${JSON.stringify(result)}`,
+        )
+      } else {
+        payload.logger.info('ℹ️ Site settings already exists with data, skipping seed')
       }
     } catch (error) {
       payload.logger.error(
         `❌ Error seeding site settings: ${error instanceof Error ? error.message : String(error)}`,
       )
+      payload.logger.error(
+        `❌ Error stack: ${error instanceof Error ? error.stack : String(error)}`,
+      )
     }
 
     // Seed default home page if it doesn't exist
     try {
-      const existingHomePage = await payload.findGlobal({
-        slug: 'home-page',
-      })
+      let existingHomePage: any = null
+      let shouldSeed = false
 
-      if (!existingHomePage || !existingHomePage.heroTitle) {
-        await payload.updateGlobal({
+      try {
+        existingHomePage = await payload.findGlobal({
+          slug: 'home-page',
+        })
+        payload.logger.info(`ℹ️ Found existing home page: ${JSON.stringify(existingHomePage)}`)
+        // ถ้ามีแล้วแต่ไม่มี heroTitle ให้ seed ใหม่
+        if (!existingHomePage?.heroTitle) {
+          shouldSeed = true
+          payload.logger.info('ℹ️ Home page exists but missing heroTitle, will seed')
+        }
+      } catch (err: any) {
+        // Global doesn't exist yet, will create it
+        payload.logger.info(`ℹ️ Home page not found: ${err.message}, will create`)
+        shouldSeed = true
+      }
+
+      if (shouldSeed) {
+        payload.logger.info('🌱 Seeding home page...')
+        const result = await payload.updateGlobal({
           slug: 'home-page',
           data: {
             heroTitle: 'เริ่มซื้อหวยวันนี้!',
@@ -240,13 +291,18 @@ export default buildConfig({
             ctaButtonLink: '/login',
             showCTA: true,
           },
+          overrideAccess: true,
         })
-
-        payload.logger.info('✅ Default home page seeded successfully')
+        payload.logger.info(`✅ Default home page seeded successfully: ${JSON.stringify(result)}`)
+      } else {
+        payload.logger.info('ℹ️ Home page already exists with data, skipping seed')
       }
     } catch (error) {
       payload.logger.error(
         `❌ Error seeding home page: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      payload.logger.error(
+        `❌ Error stack: ${error instanceof Error ? error.stack : String(error)}`,
       )
     }
   },
