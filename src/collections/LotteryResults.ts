@@ -232,7 +232,9 @@ export const LotteryResults: CollectionConfig = {
                 `Checked ${result.checked} tickets: ${result.won} won, total prize: ${result.totalPrize} THB`,
               )
             } catch (error) {
-              req.payload.logger.error(`Error checking tickets for draw ${drawId}:`, error)
+              req.payload.logger.error(
+                `Error checking tickets for draw ${drawId}: ${error instanceof Error ? error.message : String(error)}`,
+              )
             }
           }
         }

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 import NavigationClient from '../components/NavigationClient'
 import '../styles.css'
@@ -34,7 +34,7 @@ interface CheckResult {
   result?: any
 }
 
-export default function CheckPage() {
+function CheckPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const ticketId = searchParams.get('ticket')
@@ -279,6 +279,24 @@ export default function CheckPage() {
         <p>Smart Lotto - ระบบหวยออนไลน์</p>
       </footer>
     </div>
+  )
+}
+
+export default function CheckPage() {
+  return (
+    <Suspense fallback={
+      <div className="home">
+        <header className="header">
+          <h1>🎰 Smart Lotto</h1>
+          <NavigationClient />
+        </header>
+        <main className="main-content">
+          <div className="loading">กำลังโหลด...</div>
+        </main>
+      </div>
+    }>
+      <CheckPageContent />
+    </Suspense>
   )
 }
 

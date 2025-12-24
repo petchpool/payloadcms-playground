@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import NavigationClient from '../components/NavigationClient'
 import '../styles.css'
 import './login.css'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
@@ -152,6 +152,24 @@ export default function LoginPage() {
         <p>Smart Lotto - ระบบหวยออนไลน์</p>
       </footer>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="home">
+        <header className="header">
+          <h1>🎰 Smart Lotto</h1>
+          <NavigationClient />
+        </header>
+        <main className="main-content">
+          <div className="loading">กำลังโหลด...</div>
+        </main>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   )
 }
 

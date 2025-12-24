@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 import NavigationClient from '../components/NavigationClient'
 import '../styles.css'
@@ -15,7 +15,7 @@ interface Draw {
   status: string
 }
 
-export default function BuyPage() {
+function BuyPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const drawId = searchParams.get('draw')
@@ -302,5 +302,23 @@ export default function BuyPage() {
         <p>Smart Lotto - ระบบหวยออนไลน์</p>
       </footer>
     </div>
+  )
+}
+
+export default function BuyPage() {
+  return (
+    <Suspense fallback={
+      <div className="home">
+        <header className="header">
+          <h1>🎰 Smart Lotto</h1>
+          <NavigationClient />
+        </header>
+        <div className="main-content">
+          <div className="loading">กำลังโหลด...</div>
+        </div>
+      </div>
+    }>
+      <BuyPageContent />
+    </Suspense>
   )
 }
