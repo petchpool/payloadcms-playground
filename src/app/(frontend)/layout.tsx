@@ -5,19 +5,27 @@ import config from '@/payload.config'
 import './styles.css'
 
 export async function generateMetadata() {
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-
   try {
-    const siteSettings = await payload.findGlobal({
-      slug: 'site-settings',
-    })
+    const payloadConfig = await config
+    const payload = await getPayload({ config: payloadConfig })
 
-    return {
-      title: siteSettings?.siteName || 'Smart Lotto',
-      description: siteSettings?.siteDescription || 'ระบบหวยออนไลน์',
+    try {
+      const siteSettings = await payload.findGlobal({
+        slug: 'site-settings',
+      })
+
+      return {
+        title: siteSettings?.siteName || 'Smart Lotto',
+        description: siteSettings?.siteDescription || 'ระบบหวยออนไลน์',
+      }
+    } catch {
+      return {
+        title: 'Smart Lotto',
+        description: 'ระบบหวยออนไลน์',
+      }
     }
   } catch {
+    // Fallback if Payload initialization fails (e.g., during build)
     return {
       title: 'Smart Lotto',
       description: 'ระบบหวยออนไลน์',
@@ -27,24 +35,33 @@ export async function generateMetadata() {
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
+  
+  let siteName = 'Smart Lotto'
+  let favicon: string | null = null
 
-  let siteSettings: any = null
   try {
-    siteSettings = await payload.findGlobal({
-      slug: 'site-settings',
-    })
-  } catch {
-    // Fallback if global doesn't exist yet
-  }
+    const payloadConfig = await config
+    const payload = await getPayload({ config: payloadConfig })
 
-  const siteName = siteSettings?.siteName || 'Smart Lotto'
-  const favicon = siteSettings?.favicon
-    ? typeof siteSettings.favicon === 'object' && siteSettings.favicon
-      ? (siteSettings.favicon as any).url
+    let siteSettings: any = null
+    try {
+      siteSettings = await payload.findGlobal({
+        slug: 'site-settings',
+      })
+    } catch {
+      // Fallback if global doesn't exist yet
+    }
+
+    siteName = siteSettings?.siteName || 'Smart Lotto'
+    favicon = siteSettings?.favicon
+      ? typeof siteSettings.favicon === 'object' && siteSettings.favicon
+        ? (siteSettings.favicon as any).url
+        : null
       : null
-    : null
+  } catch {
+    // Fallback if Payload initialization fails (e.g., during build)
+    // Use default values
+  }
 
   return (
     <html lang="th">

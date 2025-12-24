@@ -30,6 +30,11 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+# Set PAYLOAD_SECRET for build time (required for Payload CMS initialization)
+# This is a dummy value for build - actual secret should be set at runtime via environment variable
+# The secret in payload.config.ts will use this value during build, but runtime should override it
+ENV PAYLOAD_SECRET=dummy-secret-for-build-only-do-not-use-in-production
+
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \

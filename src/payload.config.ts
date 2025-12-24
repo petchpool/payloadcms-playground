@@ -27,7 +27,10 @@ export default buildConfig({
   collections: [Users, Media, LotteryDraws, LotteryTickets, LotteryResults],
   globals: [Navigation, SiteSettings, HomePage],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  // Use dummy secret for build time if PAYLOAD_SECRET is not set
+  // Actual secret should be provided at runtime via environment variable
+  // In production, PAYLOAD_SECRET must be set or Payload will throw an error
+  secret: process.env.PAYLOAD_SECRET || 'dummy-secret-for-build-only-do-not-use-in-production',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

@@ -8,6 +8,9 @@ import config from '@/payload.config'
 import Navigation from './components/Navigation'
 import './styles.css'
 
+// Force dynamic rendering to avoid build-time Payload initialization issues
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const headers = await getHeaders()
   const payloadConfig = await config

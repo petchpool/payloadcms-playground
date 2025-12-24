@@ -8,6 +8,9 @@ import Navigation from '../components/Navigation'
 import '../styles.css'
 import './my-tickets.css'
 
+// Force dynamic rendering to avoid build-time Payload initialization issues
+export const dynamic = 'force-dynamic'
+
 export default async function MyTicketsPage() {
   const headers = await getHeaders()
   const payloadConfig = await config
