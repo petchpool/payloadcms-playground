@@ -1,0 +1,267 @@
+.check-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.check-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.check-header h2 {
+  margin: 0;
+}
+
+.back-link {
+  color: rgb(200, 200, 200);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: rgb(255, 255, 255);
+}
+
+.ticket-summary {
+  background: rgb(20, 20, 20);
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.ticket-summary h3 {
+  margin: 0 0 1.5rem 0;
+  color: rgb(220, 220, 220);
+}
+
+.summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-info p {
+  margin: 0;
+  color: rgb(180, 180, 180);
+}
+
+.summary-info strong {
+  color: rgb(220, 220, 220);
+}
+
+.ticket-numbers-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticket-numbers-summary strong {
+  color: rgb(220, 220, 220);
+}
+
+.numbers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.number-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgb(10, 10, 10);
+  border-radius: 4px;
+  min-width: 100px;
+}
+
+.number {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: rgb(255, 255, 255);
+  letter-spacing: 0.1em;
+}
+
+.bet-type {
+  font-size: 0.8rem;
+  color: rgb(150, 150, 150);
+}
+
+.check-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.btn-check-result {
+  padding: 1rem 3rem;
+  background: rgb(100, 200, 255);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-check-result:hover:not(:disabled) {
+  background: rgb(120, 220, 255);
+}
+
+.btn-check-result:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  padding: 1rem;
+  background: rgb(200, 60, 60);
+  color: white;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+
+.result-section {
+  background: rgb(20, 20, 20);
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.result-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: rgb(220, 220, 220);
+}
+
+.result-won {
+  text-align: center;
+  padding: 2rem;
+  background: rgb(20, 60, 20);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.won-badge {
+  font-size: 2rem;
+  font-weight: bold;
+  color: rgb(100, 255, 100);
+  margin-bottom: 1rem;
+}
+
+.prize-total {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(255, 255, 255);
+}
+
+.result-lost {
+  text-align: center;
+  padding: 2rem;
+  background: rgb(60, 60, 60);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.lost-badge {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(200, 200, 200);
+  margin-bottom: 0.5rem;
+}
+
+.result-lost p {
+  margin: 0;
+  color: rgb(180, 180, 180);
+}
+
+.checked-numbers {
+  margin-top: 2rem;
+}
+
+.checked-numbers h4 {
+  margin: 0 0 1rem 0;
+  color: rgb(220, 220, 220);
+}
+
+.checked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checked-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgb(10, 10, 10);
+  border-radius: 4px;
+  border-left: 4px solid rgb(60, 60, 60);
+}
+
+.checked-item.won {
+  border-left-color: rgb(100, 255, 100);
+  background: rgb(20, 40, 20);
+}
+
+.checked-item.lost {
+  border-left-color: rgb(200, 200, 200);
+}
+
+.checked-number {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(255, 255, 255);
+  letter-spacing: 0.1em;
+  min-width: 120px;
+}
+
+.checked-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.checked-info .bet-type {
+  font-size: 0.9rem;
+  color: rgb(150, 150, 150);
+}
+
+.prize-info {
+  color: rgb(100, 255, 100);
+  font-weight: 600;
+}
+
+.no-prize {
+  color: rgb(150, 150, 150);
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .check-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .checked-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checked-number {
+    min-width: auto;
+  }
+}
+

@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'lottery-draws': LotteryDraw;
+    'lottery-tickets': LotteryTicket;
+    'lottery-results': LotteryResult;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,17 +81,28 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'lottery-draws': LotteryDrawsSelect<false> | LotteryDrawsSelect<true>;
+    'lottery-tickets': LotteryTicketsSelect<false> | LotteryTicketsSelect<true>;
+    'lottery-results': LotteryResultsSelect<false> | LotteryResultsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    navigation: Navigation;
+    'site-settings': SiteSetting;
+    'home-page': HomePage;
+  };
+  globalsSelect: {
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -121,7 +135,8 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  roles: ('admin' | 'user')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -145,7 +160,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -161,10 +176,112 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-draws".
+ */
+export interface LotteryDraw {
+  id: number;
+  /**
+   * เลขงวดหวย เช่น 25670101
+   */
+  drawNumber: string;
+  drawDate: string;
+  /**
+   * เลือกรอบหวย (เช้า/บ่าย/เย็น)
+   */
+  round: 'morning' | 'afternoon' | 'evening';
+  status: 'pending' | 'completed' | 'cancelled';
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-tickets".
+ */
+export interface LotteryTicket {
+  id: number;
+  /**
+   * เลขที่ตั๋วหวย (อัตโนมัติ)
+   */
+  ticketNumber: string;
+  user: number | User;
+  draw: number | LotteryDraw;
+  numbers: {
+    number: string;
+    betType: 'straight' | 'running' | 'tod';
+    id?: string | null;
+  }[];
+  amount: number;
+  status: 'pending' | 'won' | 'lost' | 'cancelled';
+  /**
+   * จำนวนเงินรางวัลที่ได้รับ (ถ้ามี)
+   */
+  prizeAmount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-results".
+ */
+export interface LotteryResult {
+  id: number;
+  draw: number | LotteryDraw;
+  firstPrize: string;
+  secondPrize: {
+    number: string;
+    id?: string | null;
+  }[];
+  thirdPrize: {
+    number: string;
+    id?: string | null;
+  }[];
+  fourthPrize?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  fifthPrize?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  frontThreeDigits?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  backThreeDigits?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  frontTwoDigits?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  backTwoDigits?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -181,20 +298,32 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'lottery-draws';
+        value: number | LotteryDraw;
+      } | null)
+    | ({
+        relationTo: 'lottery-tickets';
+        value: number | LotteryTicket;
+      } | null)
+    | ({
+        relationTo: 'lottery-results';
+        value: number | LotteryResult;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -204,10 +333,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -227,7 +356,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -238,6 +367,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -272,6 +402,99 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-draws_select".
+ */
+export interface LotteryDrawsSelect<T extends boolean = true> {
+  drawNumber?: T;
+  drawDate?: T;
+  round?: T;
+  status?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-tickets_select".
+ */
+export interface LotteryTicketsSelect<T extends boolean = true> {
+  ticketNumber?: T;
+  user?: T;
+  draw?: T;
+  numbers?:
+    | T
+    | {
+        number?: T;
+        betType?: T;
+        id?: T;
+      };
+  amount?: T;
+  status?: T;
+  prizeAmount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lottery-results_select".
+ */
+export interface LotteryResultsSelect<T extends boolean = true> {
+  draw?: T;
+  firstPrize?: T;
+  secondPrize?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  thirdPrize?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  fourthPrize?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  fifthPrize?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  frontThreeDigits?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  backThreeDigits?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  frontTwoDigits?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  backTwoDigits?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -312,6 +535,155 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  menuItems?:
+    | {
+        /**
+         * ข้อความที่แสดงในเมนู
+         */
+        label: string;
+        /**
+         * URL หรือ path (เช่น /buy, /results)
+         */
+        href: string;
+        showWhen: 'always' | 'authenticated' | 'guest';
+        /**
+         * ลำดับการแสดงผล (น้อยกว่า = แสดงก่อน)
+         */
+        order?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  /**
+   * คำอธิบายสั้นๆ ของเว็บไซต์
+   */
+  siteDescription?: string | null;
+  logo?: (number | null) | Media;
+  favicon?: (number | null) | Media;
+  footerText?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  heroTitle: string;
+  /**
+   * ข้อความที่แสดงใต้หัวข้อหลัก
+   */
+  heroDescription?: string | null;
+  heroImage?: (number | null) | Media;
+  heroButtonText?: string | null;
+  heroButtonLink?: string | null;
+  showHero?: boolean | null;
+  /**
+   * Features ที่จะแสดงในหน้าแรก
+   */
+  features?:
+    | {
+        title: string;
+        description?: string | null;
+        /**
+         * เช่น 🎰, 🎯, 💰
+         */
+        icon?: string | null;
+        order?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  showFeatures?: boolean | null;
+  ctaTitle?: string | null;
+  ctaDescription?: string | null;
+  ctaButtonText?: string | null;
+  ctaButtonLink?: string | null;
+  showCTA?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  menuItems?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        showWhen?: T;
+        order?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  siteDescription?: T;
+  logo?: T;
+  favicon?: T;
+  footerText?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroDescription?: T;
+  heroImage?: T;
+  heroButtonText?: T;
+  heroButtonLink?: T;
+  showHero?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        icon?: T;
+        order?: T;
+        id?: T;
+      };
+  showFeatures?: T;
+  ctaTitle?: T;
+  ctaDescription?: T;
+  ctaButtonText?: T;
+  ctaButtonLink?: T;
+  showCTA?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

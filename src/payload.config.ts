@@ -7,6 +7,12 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { LotteryDraws } from './collections/LotteryDraws'
+import { LotteryTickets } from './collections/LotteryTickets'
+import { LotteryResults } from './collections/LotteryResults'
+import { Navigation } from './globals/Navigation'
+import { SiteSettings } from './globals/SiteSettings'
+import { HomePage } from './globals/HomePage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -18,7 +24,8 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, LotteryDraws, LotteryTickets, LotteryResults],
+  globals: [Navigation, SiteSettings, HomePage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -31,4 +38,216 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
+  onInit: async (payload) => {
+    // Seed default navigation menu if it doesn't exist
+    try {
+      const existingNav = await payload.findGlobal({
+        slug: 'navigation',
+      })
+
+      // ถ้ายังไม่มีข้อมูล หรือไม่มี menuItems ให้ seed ข้อมูลเริ่มต้น
+      if (!existingNav || !existingNav.menuItems || existingNav.menuItems.length === 0) {
+        await payload.updateGlobal({
+          slug: 'navigation',
+          data: {
+            menuItems: [
+              {
+                label: 'หน้าแรก',
+                href: '/',
+                showWhen: 'always',
+                order: 1,
+              },
+              {
+                label: 'ซื้อหวย',
+                href: '/buy',
+                showWhen: 'authenticated',
+                order: 2,
+              },
+              {
+                label: 'ตั๋วของฉัน',
+                href: '/my-tickets',
+                showWhen: 'authenticated',
+                order: 3,
+              },
+              {
+                label: 'ผลหวย',
+                href: '/results',
+                showWhen: 'always',
+                order: 4,
+              },
+              {
+                label: 'ตรวจผล',
+                href: '/check',
+                showWhen: 'authenticated',
+                order: 5,
+              },
+              {
+                label: '__USER_INFO__',
+                href: '__USER_INFO__',
+                showWhen: 'authenticated',
+                order: 6,
+              },
+              {
+                label: 'เข้าสู่ระบบ',
+                href: '/login',
+                showWhen: 'guest',
+                order: 7,
+              },
+              {
+                label: 'ออกจากระบบ',
+                href: '/api/users/logout',
+                showWhen: 'authenticated',
+                order: 8,
+              },
+            ],
+          },
+        })
+
+        payload.logger.info('✅ Default navigation menu seeded successfully')
+      }
+    } catch (error) {
+      payload.logger.error(
+        `❌ Error seeding navigation menu: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
+    // Seed default lottery draws if none exist
+    try {
+      const existingDraws = await payload.count({
+        collection: 'lottery-draws',
+      })
+
+      // ถ้ายังไม่มีงวดหวย ให้ seed ข้อมูลเริ่มต้น
+      if (existingDraws.totalDocs === 0) {
+        const today = new Date()
+        const rounds = ['morning', 'afternoon', 'evening'] as const
+        const roundLabels = {
+          morning: 'รอบเช้า',
+          afternoon: 'รอบบ่าย',
+          evening: 'รอบเย็น',
+        }
+
+        // สร้างงวดหวยสำหรับวันนี้และ 7 วันข้างหน้า (แต่ละวันมี 3 รอบ)
+        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+          const drawDate = new Date(today)
+          drawDate.setDate(today.getDate() + dayOffset)
+          drawDate.setHours(0, 0, 0, 0)
+
+          const year = drawDate.getFullYear()
+          const month = String(drawDate.getMonth() + 1).padStart(2, '0')
+          const day = String(drawDate.getDate()).padStart(2, '0')
+          const dateStr = `${year}${month}${day}`
+
+          for (const round of rounds) {
+            // สร้างเลขงวด: YYYYMMDD + รอบ (1=เช้า, 2=บ่าย, 3=เย็น)
+            const roundNum = round === 'morning' ? '1' : round === 'afternoon' ? '2' : '3'
+            const drawNumber = `${dateStr}${roundNum}`
+
+            // ตั้งเวลาให้เหมาะสมกับแต่ละรอบ
+            const roundDrawDate = new Date(drawDate)
+            if (round === 'morning') {
+              roundDrawDate.setHours(10, 0, 0, 0) // 10:00 น.
+            } else if (round === 'afternoon') {
+              roundDrawDate.setHours(14, 0, 0, 0) // 14:00 น.
+            } else {
+              roundDrawDate.setHours(18, 0, 0, 0) // 18:00 น.
+            }
+
+            await payload.create({
+              collection: 'lottery-draws',
+              data: {
+                drawNumber,
+                drawDate: roundDrawDate.toISOString(),
+                round,
+                status: 'pending',
+                description: `งวดหวย ${dateStr} ${roundLabels[round]}`,
+              },
+            })
+          }
+        }
+
+        payload.logger.info('✅ Default lottery draws seeded successfully (7 days, 3 rounds each)')
+      }
+    } catch (error) {
+      payload.logger.error(
+        `❌ Error seeding lottery draws: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
+    // Seed default site settings if it doesn't exist
+    try {
+      const existingSiteSettings = await payload.findGlobal({
+        slug: 'site-settings',
+      })
+
+      if (!existingSiteSettings || !existingSiteSettings.siteName) {
+        await payload.updateGlobal({
+          slug: 'site-settings',
+          data: {
+            siteName: 'Smart Lotto',
+            siteDescription: 'ระบบหวยออนไลน์ที่ทันสมัยและปลอดภัย',
+            footerText: 'Smart Lotto - ระบบหวยออนไลน์',
+          },
+        })
+
+        payload.logger.info('✅ Default site settings seeded successfully')
+      }
+    } catch (error) {
+      payload.logger.error(
+        `❌ Error seeding site settings: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
+    // Seed default home page if it doesn't exist
+    try {
+      const existingHomePage = await payload.findGlobal({
+        slug: 'home-page',
+      })
+
+      if (!existingHomePage || !existingHomePage.heroTitle) {
+        await payload.updateGlobal({
+          slug: 'home-page',
+          data: {
+            heroTitle: 'เริ่มซื้อหวยวันนี้!',
+            heroDescription: 'ระบบหวยออนไลน์ที่ทันสมัย ปลอดภัย และตรวจผลได้ทันที',
+            heroButtonText: 'เข้าสู่ระบบ',
+            heroButtonLink: '/login',
+            showHero: true,
+            features: [
+              {
+                title: 'ซื้อหวยง่าย',
+                description: 'ซื้อหวยได้ทุกที่ทุกเวลา เพียงไม่กี่คลิก',
+                icon: '🎰',
+                order: 1,
+              },
+              {
+                title: 'ตรวจผลทันที',
+                description: 'ตรวจผลหวยได้ทันทีหลังประกาศผล',
+                icon: '🎯',
+                order: 2,
+              },
+              {
+                title: 'ปลอดภัย',
+                description: 'ระบบรักษาความปลอดภัยสูงสุด',
+                icon: '🔒',
+                order: 3,
+              },
+            ],
+            showFeatures: true,
+            ctaTitle: 'เริ่มซื้อหวยวันนี้!',
+            ctaDescription: 'เข้าสู่ระบบเพื่อซื้อหวยและตรวจผล',
+            ctaButtonText: 'เข้าสู่ระบบ',
+            ctaButtonLink: '/login',
+            showCTA: true,
+          },
+        })
+
+        payload.logger.info('✅ Default home page seeded successfully')
+      }
+    } catch (error) {
+      payload.logger.error(
+        `❌ Error seeding home page: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  },
 })

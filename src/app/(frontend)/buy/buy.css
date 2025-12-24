@@ -1,0 +1,230 @@
+.buy-page {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin: 0 0 1rem 0;
+  font-size: 2.5rem;
+}
+
+.back-link {
+  color: rgb(200, 200, 200);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: rgb(255, 255, 255);
+}
+
+.buy-container {
+  background: rgb(20, 20, 20);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.buy-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: rgb(220, 220, 220);
+}
+
+.form-group select,
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 4px;
+  background: rgb(10, 10, 10);
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: rgb(100, 100, 200);
+}
+
+.draw-info {
+  background: rgb(30, 30, 30);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.draw-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: rgb(100, 200, 100);
+}
+
+.draw-round-info {
+  margin: 0 0 0.5rem 0;
+}
+
+.round-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgb(100, 150, 255);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.draw-info p {
+  margin: 0;
+  color: rgb(180, 180, 180);
+}
+
+.numbers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.number-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.number-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 4px;
+  background: rgb(10, 10, 10);
+  color: rgb(255, 255, 255);
+  font-size: 1.2rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+}
+
+.bet-type-select {
+  padding: 0.75rem;
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 4px;
+  background: rgb(10, 10, 10);
+  color: rgb(255, 255, 255);
+  min-width: 120px;
+}
+
+.btn-remove {
+  padding: 0.75rem 1rem;
+  background: rgb(200, 60, 60);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-remove:hover {
+  background: rgb(220, 80, 80);
+}
+
+.btn-add {
+  padding: 0.75rem 1rem;
+  background: rgb(60, 60, 200);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.btn-add:hover {
+  background: rgb(80, 80, 220);
+}
+
+.form-hint {
+  font-size: 0.875rem;
+  color: rgb(150, 150, 150);
+  margin: 0;
+}
+
+.amount-input {
+  padding: 0.75rem;
+  border: 1px solid rgb(60, 60, 60);
+  border-radius: 4px;
+  background: rgb(10, 10, 10);
+  color: rgb(255, 255, 255);
+  font-size: 1.2rem;
+}
+
+.error-message {
+  padding: 1rem;
+  background: rgb(200, 60, 60);
+  color: white;
+  border-radius: 4px;
+}
+
+.success-message {
+  padding: 1rem;
+  background: rgb(60, 200, 60);
+  color: white;
+  border-radius: 4px;
+}
+
+.btn-submit {
+  padding: 1rem 2rem;
+  background: rgb(100, 200, 100);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: rgb(120, 220, 120);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .buy-page {
+    padding: 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .number-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bet-type-select {
+    width: 100%;
+  }
+}
+
