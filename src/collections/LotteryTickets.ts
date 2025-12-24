@@ -49,7 +49,10 @@ export const LotteryTickets: CollectionConfig = {
           type: 'text',
           required: true,
           label: 'เลข',
-          validate: (value: string) => {
+          validate: (value: string | string[] | null | undefined) => {
+            if (typeof value !== 'string') {
+              return 'เลขหวยต้องเป็นตัวอักษร'
+            }
             if (!value || value.length !== 6) {
               return 'เลขหวยต้องเป็น 6 หลัก'
             }
@@ -125,12 +128,19 @@ export const LotteryTickets: CollectionConfig = {
   timestamps: true,
   hooks: {
     beforeValidate: [
-      async ({ data, operation }) => {
-        if (operation === 'create' && !data.ticketNumber) {
+      async ({ data, operation, req }) => {
+        if (operation === 'create' && data) {
+          // Auto-set user from req.user if not provided
+          if (!data.user && req.user?.id) {
+            data.user = req.user.id
+          }
+
           // สร้างเลขที่ตั๋วอัตโนมัติ
-          const timestamp = Date.now()
-          const random = Math.floor(Math.random() * 1000)
-          data.ticketNumber = `TKT${timestamp}${random.toString().padStart(3, '0')}`
+          if (!data.ticketNumber) {
+            const timestamp = Date.now()
+            const random = Math.floor(Math.random() * 1000)
+            data.ticketNumber = `TKT${timestamp}${random.toString().padStart(3, '0')}`
+          }
         }
         return data
       },
@@ -174,12 +184,15 @@ export const LotteryTickets: CollectionConfig = {
           throw new APIError('Unauthorized', 401)
         }
 
-        const { id } = req.routeParams
+        const id = req.routeParams?.id
+        if (!id || (typeof id !== 'string' && typeof id !== 'number')) {
+          throw new APIError('Ticket ID is required', 400)
+        }
 
         // ดึงข้อมูลตั๋ว
         const ticket = await req.payload.findByID({
           collection: 'lottery-tickets',
-          id,
+          id: typeof id === 'string' ? id : String(id),
           depth: 1,
         })
 
@@ -188,18 +201,19 @@ export const LotteryTickets: CollectionConfig = {
         }
 
         // ตรวจสอบสิทธิ์: ผู้ใช้สามารถตรวจผลตั๋วของตัวเองได้, Admin ตรวจได้ทั้งหมด
+        const userId = req.user?.id
         if (
-          !req.user.roles?.includes('admin') &&
-          (typeof ticket.user === 'string'
-            ? ticket.user !== req.user.id
-            : (ticket.user as any).id !== req.user.id)
+          !userId ||
+          (!req.user.roles?.includes('admin') &&
+            (typeof ticket.user === 'string'
+              ? ticket.user !== userId
+              : (ticket.user as any)?.id !== userId))
         ) {
           throw new APIError('Forbidden', 403)
         }
 
         // ดึงข้อมูลผลหวย
-        const drawId =
-          typeof ticket.draw === 'string' ? ticket.draw : (ticket.draw as any).id
+        const drawId = typeof ticket.draw === 'string' ? ticket.draw : (ticket.draw as any).id
 
         const lotteryResult = await req.payload.find({
           collection: 'lottery-results',
@@ -277,36 +291,28 @@ export const LotteryTickets: CollectionConfig = {
           // ตรวจสอบเลขหน้า 3 ตัว
           else if (type === 'running' || type === 'straight') {
             const frontThree = number.substring(0, 3)
-            if (
-              resultData.frontThreeDigits?.some((p: any) => p.number === frontThree)
-            ) {
+            if (resultData.frontThreeDigits?.some((p: any) => p.number === frontThree)) {
               betPrize = (ticket.amount as number) * 4000
               prizeType = 'frontThreeDigits'
             }
             // ตรวจสอบเลขหลัง 3 ตัว
             else {
               const backThree = number.substring(3, 6)
-              if (
-                resultData.backThreeDigits?.some((p: any) => p.number === backThree)
-              ) {
+              if (resultData.backThreeDigits?.some((p: any) => p.number === backThree)) {
                 betPrize = (ticket.amount as number) * 4000
                 prizeType = 'backThreeDigits'
               }
               // ตรวจสอบเลขหน้า 2 ตัว
               else {
                 const frontTwo = number.substring(0, 2)
-                if (
-                  resultData.frontTwoDigits?.some((p: any) => p.number === frontTwo)
-                ) {
+                if (resultData.frontTwoDigits?.some((p: any) => p.number === frontTwo)) {
                   betPrize = (ticket.amount as number) * 2000
                   prizeType = 'frontTwoDigits'
                 }
                 // ตรวจสอบเลขหลัง 2 ตัว
                 else {
                   const backTwo = number.substring(4, 6)
-                  if (
-                    resultData.backTwoDigits?.some((p: any) => p.number === backTwo)
-                  ) {
+                  if (resultData.backTwoDigits?.some((p: any) => p.number === backTwo)) {
                     betPrize = (ticket.amount as number) * 2000
                     prizeType = 'backTwoDigits'
                   }
@@ -339,4 +345,3 @@ export const LotteryTickets: CollectionConfig = {
     } as Endpoint,
   ],
 }
-

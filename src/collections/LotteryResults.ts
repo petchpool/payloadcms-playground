@@ -22,7 +22,7 @@ export const LotteryResults: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'รางวัลที่ 1',
-      validate: (value: string) => {
+      validate: (value: string | null | undefined) => {
         if (!value || value.length !== 6) {
           return 'เลขหวยต้องเป็น 6 หลัก'
         }
@@ -44,7 +44,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 6) {
               return 'เลขหวยต้องเป็น 6 หลัก'
             }
@@ -68,7 +68,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 6) {
               return 'เลขหวยต้องเป็น 6 หลัก'
             }
@@ -89,7 +89,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 6) {
               return 'เลขหวยต้องเป็น 6 หลัก'
             }
@@ -110,7 +110,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 6) {
               return 'เลขหวยต้องเป็น 6 หลัก'
             }
@@ -131,7 +131,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 3) {
               return 'เลขหน้า 3 ตัวต้องเป็น 3 หลัก'
             }
@@ -152,7 +152,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 3) {
               return 'เลขหลัง 3 ตัวต้องเป็น 3 หลัก'
             }
@@ -173,7 +173,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 2) {
               return 'เลขหน้า 2 ตัวต้องเป็น 2 หลัก'
             }
@@ -194,7 +194,7 @@ export const LotteryResults: CollectionConfig = {
           name: 'number',
           type: 'text',
           required: true,
-          validate: (value: string) => {
+          validate: (value: string | null | undefined) => {
             if (!value || value.length !== 2) {
               return 'เลขหลัง 2 ตัวต้องเป็น 2 หลัก'
             }
@@ -223,8 +223,7 @@ export const LotteryResults: CollectionConfig = {
       async ({ doc, req, operation }) => {
         // เมื่อมีการสร้างหรืออัปเดตผลหวย ให้ตรวจผลตั๋วทั้งหมดอัตโนมัติ
         if (operation === 'create' || operation === 'update') {
-          const drawId =
-            typeof doc.draw === 'string' ? doc.draw : (doc.draw as any).id
+          const drawId = typeof doc.draw === 'string' ? doc.draw : (doc.draw as any).id
 
           if (drawId) {
             try {
@@ -233,10 +232,7 @@ export const LotteryResults: CollectionConfig = {
                 `Checked ${result.checked} tickets: ${result.won} won, total prize: ${result.totalPrize} THB`,
               )
             } catch (error) {
-              req.payload.logger.error(
-                `Error checking tickets for draw ${drawId}:`,
-                error,
-              )
+              req.payload.logger.error(`Error checking tickets for draw ${drawId}:`, error)
             }
           }
         }
@@ -251,4 +247,3 @@ export const LotteryResults: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
   },
 }
-
